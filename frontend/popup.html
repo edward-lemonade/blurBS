@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Misinformation Detector</title>
+  <style>
+    body {
+      width: 400px;
+      min-height: 300px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .header {
+      padding: 20px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .status-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.inactive {
+      background: #f44336;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .toggle-button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .stats-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .actions-section {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .action-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .footer {
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🩺 Medical Misinformation Detector</h1>
+    <p>AI-powered medical claim verification</p>
+  </div>
+
+  <div class="content">
+    <div class="status-section">
+      <div class="status-indicator">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Active</span>
+      </div>
+      <button class="toggle-button" id="toggleButton">Disable Extension</button>
+    </div>
+
+    <div class="stats-section">
+      <h3 style="margin: 0 0 12px 0; font-size: 14px;">Session Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="claimsAnalyzed">0</div>
+          <div class="stat-label">Claims Analyzed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="misinformationFound">0</div>
+          <div class="stat-label">Misinformation Found</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <button class="action-button" id="analyzeButton">Analyze Current Page</button>
+      <button class="action-button" id="settingsButton">Settings</button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Analyzing page...</div>
+  </div>
+
+  <div class="footer">
+    <div>Powered by RAG Technology</div>
+    <div>Version 1.0.0</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

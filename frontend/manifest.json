@@ -1,0 +1,14 @@
+{
+	"manifest_version": 3,
+	"name": "MedBrowse",
+	"version": "1.0",
+	"description": "Flags medical misinformation and corrects it for you for informed browsing.",
+	"permissions": ["scripting"],
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content.js"],
+			"run_at": "document_idle"
+		}
+	]
+}
