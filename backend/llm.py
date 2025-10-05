@@ -60,25 +60,13 @@ def generate_answer(query, tokenizer, model, max_new_tokens=512, temperature=0.7
 	
 	messages = [{
 		"role": "system",
-		"content": "You are a helpful assistant that identifies misinformation and provides corrections. Ignore correct information. Always respond with precisely a JSON object and nothing else."
+		"content": "You are a helpful assistant that identifies misinformation and provides corrections. Ignore correct information. Respond with a JSON object in the format: generate a JSON object containing all instances of only incorrect statements and corresponding corrections in the form: { \"findings\": [{\"text\": \"misinformation here\", \"correction\": \"correct information here\"}]} "
 	}]
-
-	if docs:
-		context_parts = []
-		for i, doc in enumerate(docs, 1):
-			context_parts.append(f"{i}. {doc['source']}: {doc['text'][:1000]}...")
-		
-		context_content = "Here are some additional documents for context. In your JSON response, include a link to the source with correct information.\n" + "\n".join(context_parts)
-		messages.append({
-			"role": "system",
-			"content": context_content
-		})
-	
 	messages.append({
 		"role": "user",
-		"content": "Query:\n\"" + query + "\"\n\nGiven the text, generate a JSON object containing all instances of only incorrect statements and corresponding corrections in the form: { \"findings\": [{\"text\": \"misinformation here\", \"correction\": \"correct information here\", \"source\": \"link to context source if context documents were listed\"}]}. JSON notation begins here: "
+		"content": "Query:\n\"" + query + "...\"\n\n Your JSON output begins now: " 
 	})
-	
+
 	print(f"Query: {query}\n")
 	print(messages)
 	

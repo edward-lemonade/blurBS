@@ -68,6 +68,13 @@ async def query(text):
 	response = generate_answer(text, gen_tok, gen_model)
 	print(response)
 	
+	# Strip excess characters until curly braces are reached
+	start_idx = response.find('{')
+	end_idx = response.rfind('}')
+	
+	if start_idx != -1 and end_idx != -1 and start_idx < end_idx:
+		response = response[start_idx:end_idx + 1]
+	
 	result_json = json.loads(response)
 	return result_json
 

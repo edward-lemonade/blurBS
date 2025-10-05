@@ -1,2 +1,3 @@
 backend/docs
 backend/models
+backend/__pycache__
