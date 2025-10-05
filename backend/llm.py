@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import time
 import rag
+import json
 
 PROJECT_PATH = os.path.join(os.path.dirname(__file__))
 
@@ -56,12 +57,18 @@ def load_generator(quantized=True):
 
 def generate_answer(query, tokenizer, model, max_new_tokens=512, temperature=0.7, top_p=0.9):
 	docs = rag.rerank(query)
-	print(docs)
 	
 	messages = [{
 		"role": "system",
 		"content": "You are a helpful assistant that identifies misinformation and provides corrections. Ignore correct information. Respond with a JSON object in the format: generate a JSON object containing all instances of only incorrect statements and corresponding corrections in the form: { \"findings\": [{\"text\": \"misinformation here\", \"correction\": \"correct information here\"}]} "
 	}]
+	if docs:
+		context_parts = [f"{i}. {doc['source']}: {doc['text'][:1000]}..." 
+						for i, doc in enumerate(docs, 1)]
+		messages.append({
+			"role": "system",
+			"content": "Here are some additional documents for additional context you can reference." + "\n".join(context_parts)
+		})
 	messages.append({
 		"role": "user",
 		"content": "Query:\n\"" + query + "...\"\n\n Your JSON output begins now: " 
@@ -102,6 +109,24 @@ def generate_answer(query, tokenizer, model, max_new_tokens=512, temperature=0.7
 	
 	# Decode only the newly generated tokens (skip the input prompt)
 	generated_text = tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
+
+	start_idx = generated_text.find('{')
+	end_idx = generated_text.rfind('}')
 	
-	return generated_text
+	if start_idx != -1 and end_idx != -1 and start_idx < end_idx:
+		generated_text = generated_text[start_idx:end_idx + 1]
+	
+	try:
+		result_json = json.loads(generated_text)
+	except:
+		try:
+			result_json = json.loads(generated_text + '}')
+		except:
+			try:
+				result_json = json.loads(generated_text + ']}')
+			except:
+				print('Error converting to json')
+				result_json = {'findings': []}
+
+	return result_json, [doc['source'] for doc in docs]
 	

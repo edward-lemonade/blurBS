@@ -52,7 +52,11 @@
 		}
 	}
 
-	function applyCorrections(findings) {
+	function applyCorrections(result) {
+		console.log(result)	
+		const findings = result.findings;
+		const sources = result.sources;
+
 		if (!findings || !Array.isArray(findings) || findings.length === 0) {
 			console.log('No findings to apply');
 			return;
@@ -69,33 +73,127 @@
 					border-bottom: 2px solid #ffc107;
 					cursor: pointer;
 					transition: background-color 0.2s;
+					z-index: auto;
 				}
 				.correction-highlight:hover {
 					background-color: #ffe69c;
+					z-index: 2147483647;
 				}
 				.correction-popup {
 					display: none;
-					position: absolute;
-					bottom: 100%;
-					left: 0;
+					position: fixed;
 					background: white;
 					border: 2px solid #28a745;
 					border-radius: 8px;
 					padding: 12px;
-					margin-bottom: 8px;
+					margin-top: 8px;
 					box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-					z-index: 10000;
-					min-width: 200px;
+					z-index: 2147483647;
+					min-width: 350px;
 					max-width: 400px;
 					font-size: 14px;
 					line-height: 1.5;
 					white-space: normal;
+					pointer-events: none;
 				}
 				.correction-highlight:hover .correction-popup {
 					display: block;
+					pointer-events: auto;
+				}
+				.correction-popup a {
+					color: #007bff;
+					text-decoration: none;
+					word-break: break-all;
+					pointer-events: auto;
+				}
+				.correction-popup a:hover {
+					text-decoration: underline;
+				}
+				.sources-popup {
+					display: none;
+					position: fixed;
+					top: 20px;
+					right: 20px;
+					background: white;
+					border: 2px solid #007bff;
+					border-radius: 8px;
+					padding: 16px;
+					box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+					z-index: 2147483646;
+					max-width: 350px;
+					font-size: 14px;
+					line-height: 1.5;
+				}
+				.sources-popup.show {
+					display: block;
+				}
+				.sources-popup h4 {
+					margin: 0 0 12px 0;
+					color: #007bff;
+					font-size: 16px;
+				}
+				.sources-popup ul {
+					margin: 0;
+					padding-left: 20px;
+				}
+				.sources-popup li {
+					margin-bottom: 8px;
+				}
+				.sources-popup .close-btn {
+					position: absolute;
+					top: 8px;
+					right: 12px;
+					cursor: pointer;
+					font-size: 20px;
+					color: #666;
+					background: none;
+					border: none;
+					padding: 0;
+					line-height: 1;
+				}
+				.sources-popup .close-btn:hover {
+					color: #000;
 				}
 			`;
 			document.head.appendChild(style);
+		}
+
+		// Create sources popup if sources exist
+		if (sources && Array.isArray(sources) && sources.length > 0) {
+			// Remove existing sources popup if any
+			const existingPopup = document.getElementById('sources-info-popup');
+			if (existingPopup) {
+				existingPopup.remove();
+			}
+
+			const sourcesPopup = document.createElement('div');
+			sourcesPopup.id = 'sources-info-popup';
+			sourcesPopup.className = 'sources-popup show';
+			
+			const closeBtn = document.createElement('button');
+			closeBtn.className = 'close-btn';
+			closeBtn.textContent = '×';
+			closeBtn.onclick = () => sourcesPopup.remove();
+			
+			const title = document.createElement('h4');
+			title.textContent = 'More credible info:';
+			
+			const list = document.createElement('ul');
+			sources.forEach(source => {
+				const li = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = source;
+				link.target = '_blank';
+				link.rel = 'noopener noreferrer';
+				link.textContent = source;
+				li.appendChild(link);
+				list.appendChild(li);
+			});
+			
+			sourcesPopup.appendChild(closeBtn);
+			sourcesPopup.appendChild(title);
+			sourcesPopup.appendChild(list);
+			document.body.appendChild(sourcesPopup);
 		}
 
 		let correctionsApplied = 0;
@@ -153,10 +251,10 @@
 						
 						const popup = document.createElement('div');
 						popup.className = 'correction-popup';
+						popup.textContent = `✓ Correction: ${correction}`;
+						
 						if (source) {
-							popup.textContent = `✓ Correction: ${correction} \n\n More info: ${source}`;
-						} else {
-							popup.textContent = `✓ Correction: ${correction}`;
+							popup.innerHTML += `<br><br>More info: <a href="${source}" target="_blank" rel="noopener noreferrer">${source}</a>`;
 						}
 						
 						wrapper.appendChild(popup);
@@ -185,7 +283,7 @@
 			console.log(result)
 			if (result && result.findings) {
 				console.log(`Received ${result.findings.length} findings`);
-				applyCorrections(result.findings);
+				applyCorrections(result);
 			}
 			
 			return result;

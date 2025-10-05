@@ -54,32 +54,19 @@ async def analyze(request: Request):
 	text_array = sorted(list(text_set), key=lambda x: len(x), reverse=True)
 	text = ('.'.join(text_array[:20]))[:1000]
 
-	ans = await query(text)
+	json, sources = generate_answer(text, gen_tok, gen_model)
 	
 	return {
-		"findings": ans.get('findings', []),  # List of dicts - serializes fine!
+		"findings": json.get('findings', []),  # List of dicts - serializes fine!
+		"sources": sources,
 		"metadata": {
 			"url": data.get('url'),
-			"corrections_count": len(ans.get('findings', []))
+			"corrections_count": len(json.get('findings', []))
 		}
 	}
 
-async def query(text):
-	response = generate_answer(text, gen_tok, gen_model)
-	print(response)
-	
-	# Strip excess characters until curly braces are reached
-	start_idx = response.find('{')
-	end_idx = response.rfind('}')
-	
-	if start_idx != -1 and end_idx != -1 and start_idx < end_idx:
-		response = response[start_idx:end_idx + 1]
-	
-	result_json = json.loads(response)
-	return result_json
 
-
-#res = asyncio.run(query("Vaccines cause autism. Tylenol also causes autism. There are no ways to cure autism but plenty of ways to manage it."))
+#res, docs  = asyncio.run(generate_answer("Vaccines cause autism. Tylenol also causes autism. There are no ways to cure autism but plenty of ways to manage it."))
 #print(res)
 
 uvicorn.run(app, host="127.0.0.1", port=8000)

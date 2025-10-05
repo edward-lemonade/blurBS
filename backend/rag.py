@@ -51,7 +51,7 @@ def top_k(prompt, k):
 				text_embedding = doc["embedding"]
 				similarity = util.pytorch_cos_sim(prompt_embedding, text_embedding).item()
 
-				if len(top_k_heap) < k:
+				if (similarity > SIMILARITY_THRESHOLD) and (len(top_k_heap) < k):
 					heapq.heappush(top_k_heap, (similarity, doc))
 				else:
 					heapq.heappushpop(top_k_heap, (similarity, doc))
@@ -77,10 +77,7 @@ def rerank(prompt, k=TOP_K, similarity_threshold=SIMILARITY_THRESHOLD):
 	results = ranker.rerank(rerankrequest)
 
 	# Filter results by similarity threshold
-	filtered_results = [
-		result for result in results[:TOP_P] 
-		if result.get('score', 0) >= similarity_threshold
-	]
+	filtered_results = [result for result in results[:TOP_P]]
 
 	return filtered_results
 
